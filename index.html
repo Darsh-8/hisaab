@@ -11,14 +11,14 @@
 <meta name="apple-mobile-web-app-title" content="hisaab">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F3F4F2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E1011" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#181B1E" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-b-rupee-favicon.png">
 
 <style>
   :root{ --bg:#F3F4F2; --ink:#15171A; --muted:#72777D; --rule:#E1E3E0; --surface:#FFFFFF; }
   @media (prefers-color-scheme: dark){
-    :root{ --bg:#0E1011; --ink:#EDEEEC; --muted:#8B9195; --rule:#25292C; --surface:#171A1C; }
+    :root{ --bg:#181B1E; --ink:#ECEDEA; --muted:#959CA1; --rule:#30353A; --surface:#212428; }
   }
   html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--ink);
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -71,6 +71,16 @@
   } else {
     document.getElementById("setup").hidden = false;
   }
+
+  // The app tells us when light/dark changes, so the iPhone status bar matches
+  window.addEventListener("message", e => {
+    if (!e.data || e.data.hisaab !== "theme") return;
+    const c = e.data.dark ? "#181B1E" : "#F3F4F2";
+    document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
+    const m = document.createElement("meta"); m.name = "theme-color"; m.content = c;
+    document.head.appendChild(m);
+    document.documentElement.style.setProperty("--bg", c);
+  });
 
   document.getElementById("setup").addEventListener("submit", e => {
     e.preventDefault();
