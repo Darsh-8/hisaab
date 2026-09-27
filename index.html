@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>hisaab</title>
+
+<!-- Home screen app settings (iPhone reads these from this page) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="hisaab">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F3F4F2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1011" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-b-rupee-favicon.png">
+
+<style>
+  :root{ --bg:#F3F4F2; --ink:#15171A; --muted:#72777D; --rule:#E1E3E0; --surface:#FFFFFF; }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0E1011; --ink:#EDEEEC; --muted:#8B9195; --rule:#25292C; --surface:#171A1C; }
+  }
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  body{box-sizing:border-box;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+  iframe{flex:1;width:100%;border:0;display:block;background:var(--bg)}
+  .setup{margin:auto;width:min(340px,100% - 48px);padding:24px 0}
+  .setup h1{font-size:28px;font-weight:600;letter-spacing:-.03em;margin:0 0 6px}
+  .setup p{color:var(--muted);margin:0 0 20px;font-size:15px;line-height:1.5}
+  .setup input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:12px 14px;border-radius:10px;
+    border:1px solid var(--rule);background:var(--surface);color:var(--ink)}
+  .setup button{margin-top:12px;width:100%;font:inherit;font-weight:500;padding:12px;border:0;border-radius:999px;
+    background:var(--ink);color:var(--bg);cursor:pointer}
+  .setup .err{color:#D9534F;font-size:14px;min-height:20px;margin-top:10px}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+  <iframe id="app" title="hisaab" hidden></iframe>
+
+  <form class="setup" id="setup" hidden>
+    <h1>hisaab<span style="color:var(--muted)">.</span></h1>
+    <p>Enter your dashboard key to open your money tracker. You only need to do this once on this device.</p>
+    <input id="key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Dashboard key" aria-label="Dashboard key">
+    <button type="submit">Open hisaab</button>
+    <div class="err" id="err" role="alert"></div>
+  </form>
+
+<script>
+  // Your Apps Script web app URL (the one ending in /exec). The key is NOT stored here.
+  const APP_URL = "https://script.google.com/macros/s/PASTE_YOUR_DEPLOYMENT_ID_HERE/exec";
+
+  const STORE = "hisaab-key";
+  const get = () => { try { return localStorage.getItem(STORE); } catch (e) { return null; } };
+  const set = v => { try { localStorage.setItem(STORE, v); } catch (e) {} };
+
+  function open(key){
+    document.getElementById("setup").hidden = true;
+    const f = document.getElementById("app");
+    f.src = APP_URL + "?key=" + encodeURIComponent(key);
+    f.hidden = false;
+  }
+
+  const fromUrl = new URLSearchParams(location.search).get("key");
+  if (fromUrl) set(fromUrl);
+  const key = fromUrl || get();
+
+  if (key) {
+    open(key);
+  } else {
+    document.getElementById("setup").hidden = false;
+  }
+
+  document.getElementById("setup").addEventListener("submit", e => {
+    e.preventDefault();
+    const v = document.getElementById("key").value.trim();
+    if (!v) { document.getElementById("err").textContent = "Enter the key from DASHBOARD_KEY in Code.gs."; return; }
+    set(v);
+    open(v);
+  });
+</script>
+</body>
+</html>
